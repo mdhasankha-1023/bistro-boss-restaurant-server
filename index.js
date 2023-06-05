@@ -28,27 +28,36 @@ async function run() {
     // await client.connect();
 
     // DB collection
-    const menusCollection = client.db('bistrobossDB').collection('menus')
-    const reviewsCollection = client.db('bistrobossDB').collection('reviews')
+    const menuCollection = client.db('bistrobossDB').collection('menus')
+    const reviewCollection = client.db('bistrobossDB').collection('reviews')
     const foodCartCollection = client.db('bistrobossDB').collection('carts')
+    const userCollection = client.db('bistrobossDB').collection('users')
+
+
+    //---------------------
+    // menus related Api
+    // --------------------
 
     // get all menus
     app.get('/menus', async(req, res)=> {
-        const result = await menusCollection.find().toArray();
+        const result = await menuCollection.find().toArray();
         res.send(result)
     })
+
+    //---------------------
+    // reviews related Api
+    // --------------------
 
     // get all reviews
     app.get('/reviews', async(req, res)=> {
-        const result = await reviewsCollection.find().toArray();
+        const result = await reviewCollection.find().toArray();
         res.send(result)
     })
-
-    // // get category menus
-    // app.get('/menus/:category', async(req, res) => {
-    //   console.log(req.query)
-    // })
     
+    //---------------------
+    // foodCart related Api
+    // --------------------
+
     // post food cart
     app.post('/carts', async(req, res)=> {
       const cart = req.body;
@@ -75,6 +84,46 @@ async function run() {
       res.send(result)
     })
 
+    //---------------------
+    // users related Api
+    // --------------------
+
+    // post user
+    app.post('/user', async(req, res) => {
+      const user = req.body;
+      const result = await userCollection.insertOne(user);
+      res.send(result)
+    })
+
+    // get users
+    app.get('/users', async(req, res) => {
+      const result = await userCollection.find().toArray()
+      res.send(result)
+    })
+
+    // update users info
+    app.patch('/users/:id', async(req, res)=> {
+      const id = req.params.id;
+      console.log(id)
+      const filter = {_id: new ObjectId(id)}
+      const updateUser = {
+      $set: {
+        role: 'admin'
+      }
+    };
+      const result = await userCollection.updateOne(filter, updateUser)
+      res.send(result)
+    })
+
+    // delete user
+    app.delete('/users/:id', async(req, res)=> {
+      const id = req.params.id;
+      const filter = {_id: new ObjectId(id)}
+      const result = await userCollection.deleteOne(filter)
+      res.send(result)
+    })
+
+
 
 
     // Send a ping to confirm a successful connection
@@ -87,12 +136,7 @@ async function run() {
 }
 run().catch(console.dir);
 
-
-
-
-// get all menus
-
-
+// set route for server testing
 app.get('/', (req, res)=> {
     res.send('This is bistro boss rasturent')
 })
